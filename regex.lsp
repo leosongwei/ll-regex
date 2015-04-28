@@ -41,9 +41,9 @@
                                           (return)))
                      (t (progn
                           (decf paren-level)
-                          (setf string-buff (add-char-to-string
-                                              current-char
-                                              string-buff)))))))
+                          (setf string-buff
+                                (add-char-to-string current-char
+                                                    string-buff)))))))
             ((> paren-level 0)
              (setf string-buff (add-char-to-string current-char
                                                    string-buff)))))
