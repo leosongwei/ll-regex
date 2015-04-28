@@ -14,13 +14,6 @@
 (defun parse-regex (regex-string)
   )
 
-(dotimes (index 5)
-  (if (= index 3)
-    (return))
-  (princ index))
-
-(string-length )
-
 (defun get-top-paren (regex-string)
   "GET-TOP-PAREN
    Get first sub regex string from regex-string.
@@ -33,28 +26,27 @@
         (end-at nil))
     (dotimes (index (string-length regex-string))
       (setf current-char (get-char regex-string index))
-      (cond ((eq #\( current-char) (if (> paren-level 0)
-                                     (progn
-                                       (setf string-buff
-                                             (add-char-to-string current-char
-                                                                 string-buff))
-                                       (incf paren-level))
-                                     (incf paren-level)))
-            ((eq #\) current-char) (if (> paren-level 0)
-                                     (cond ((= paren-level 1)
-                                            (progn
-                                              (decf paren-level)
-                                              (setf end-at index)
-                                              (return)))
-                                           (t (progn
-                                                (decf paren-level)
-                                                (setf string-buff
-                                                      (add-char-to-string
-                                                        current-char
-                                                        string-buff)))))))
-            ((> paren-level 0) (setf string-buff
-                                     (add-char-to-string current-char
-                                                         string-buff)))))
+      (cond ((eq #\( current-char)
+             (if (> paren-level 0)
+               (progn
+                 (setf string-buff (add-char-to-string current-char
+                                                       string-buff))
+                 (incf paren-level))
+               (incf paren-level)))
+            ((eq #\) current-char)
+             (if (> paren-level 0)
+               (cond ((= paren-level 1) (progn
+                                          (decf paren-level)
+                                          (setf end-at index)
+                                          (return)))
+                     (t (progn
+                          (decf paren-level)
+                          (setf string-buff (add-char-to-string
+                                              current-char
+                                              string-buff)))))))
+            ((> paren-level 0)
+             (setf string-buff (add-char-to-string current-char
+                                                   string-buff)))))
     (cond ((= 0 (string-length string-buff)) nil)
           ((not end-at) nil)
           ((= end-at (1- (string-length regex-string)))
