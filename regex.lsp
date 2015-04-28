@@ -78,3 +78,16 @@
           ((= 0 counter) nil)
           (t (error "This program has been fucked!")))))
 
+(defun union-ugly-p (regex-string)
+  "UGLY-UNION-P
+   say if an union is 'ugly'(end with |),
+   avoid construction of broken union NFA.
+   INPUT: MUST be a union!
+   RETURN: t nil"
+  (let* ((first-char (get-char regex-string 0))
+         (last-char  (get-char regex-string
+                               (1- (string-length regex-string)))))
+    (if (or (eq #\| last-char)
+            (eq #\| first-char))
+      t nil)))
+
