@@ -11,8 +11,44 @@
   (char string index))
 ;}}}
 
+(progn
+  (defparameter trans-table (make-array 10))
+  (defparameter index-trans-table 0))
+
+;♂
+(list '♂)
+(eq '♂ '♂)
+
+(defstruct (state (:print-function print-state))
+  (attrib nil)
+  (match nil)
+  (out1 nil)
+  (out2 nil))
+(defun print-state (state stream depth)
+  (format stream "#<S a:~A, c:~A, o1:~A o2:~A>"
+          (state-attrib state)
+          (state-match state)
+          (state-out1 state)
+          (state-out2 state)))
+
+
+(defun add-state (match attrib)
+  "ADD-STATE
+   make a state and add it to TRANS-TABLE.
+   RETURN: new state location"
+  (setf (aref trans-table index-trans-table)
+        (let ((s (make-state)))
+          (setf (state-match s) match)
+          (setf (state-attrib s) attrib)
+          s))
+  (incf index-trans-table)
+  (1- index-trans-table))
+
 (defun parse-regex (regex-string)
-  )
+  (let ((current-char nil))
+    (dotimes (index (string-length regex-string))
+      (setf current-char (get-char regex-string index))
+      (cond (())))))
 
 (defun get-first-paren (regex-string)
   "GET-FIRST-PAREN
