@@ -106,7 +106,7 @@
 
 (defun union-ugly-p (regex-string)
   "UGLY-UNION-P
-   say if an union is 'ugly'(end with |),
+   say if an union is 'ugly'(start or end with |),
    avoid construction of broken union NFA.
    INPUT: MUST be a union!
    RETURN: t nil"
