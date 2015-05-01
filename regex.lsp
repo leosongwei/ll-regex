@@ -46,9 +46,9 @@
 
 (defun parse-regex (regex-string)
   "PARSE-REGEX
-  parse a regex-string recursively.
-  RETURN:(lst begin-index end-index length)
-  "
+   parse a regex-string recursively.
+   RETURN:(lst begin-index end-index length+2)
+   "
   (let ((current-char nil))
     (dotimes (index (string-length regex-string))
       (setf current-char (get-char regex-string index))
@@ -56,11 +56,24 @@
              (progn
                (add-state nil 'finish)
                (return)))
+            ((eq #\( current-char)
+             (let (rest-regex (subseq regex-string index))
+               (if (is-union rest-regex)
+                 ; Union
+                 (if (not (union-ugly-p rest-regex))
+                   ()
+                   )
+                 ; Simple Paren
+                 (progn
+                   (parse-regex (get-first-paren rest-regex))
+                   )
+                 )
+               ))
             (t (progn
                  (let ((s-index (add-state current-char nil)))
                    (setf (state-out1 (aref trans-table s-index))
                          (1+ s-index))))))))
-  trans-table)
+  )
 
 
 (defun get-first-paren (regex-string)
