@@ -117,3 +117,21 @@
             (eq #\| first-char))
       t nil)))
 
+(defun split-union (regex-string)
+  "SPLIT-UNION
+   split a union regex string into 2 pices of regex string.
+   don't split ugly union.
+   RETURN: (cons regex1 regex2)"
+  (let ((split-location nil)
+        (current-char nil)
+        (paren-level 0))
+    (setf split-location
+          (dotimes (index (string-length regex-string))
+            (setf current-char (get-char regex-string index))
+            (cond ((eq #\( current-char) (incf paren-level))
+                  ((eq #\) current-char) (decf paren-level))
+                  ((and (eq #\| current-char)
+                        (= 0 paren-level))
+                   (return index)))))
+    (cons (subseq regex-string 0 split-location)
+          (subseq regex-string (1+ split-location)))))
