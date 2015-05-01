@@ -12,7 +12,7 @@
 ;}}}
 
 (progn
-  (defparameter trans-table (make-array 10))
+  (defparameter trans-table (make-array 50))
   (defparameter index-trans-table 0))
 
 ;♂
@@ -45,10 +45,23 @@
   (1- index-trans-table))
 
 (defun parse-regex (regex-string)
+  "PARSE-REGEX
+  parse a regex-string recursively.
+  RETURN:(lst begin-index end-index length)
+  "
   (let ((current-char nil))
     (dotimes (index (string-length regex-string))
       (setf current-char (get-char regex-string index))
-      (cond (())))))
+      (cond ((eq #\♂ current-char)
+             (progn
+               (add-state nil 'finish)
+               (return)))
+            (t (progn
+                 (let ((s-index (add-state current-char nil)))
+                   (setf (state-out1 (aref trans-table s-index))
+                         (1+ s-index))))))))
+  trans-table)
+
 
 (defun get-first-paren (regex-string)
   "GET-FIRST-PAREN
