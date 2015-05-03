@@ -31,7 +31,6 @@
           (state-out1 state)
           (state-out2 state)))
 
-
 (defun add-state (match attrib)
   "ADD-STATE
    make a state and add it to TRANS-TABLE.
@@ -43,6 +42,12 @@
           s))
   (incf index-trans-table)
   (1- index-trans-table))
+
+(defun make-dfa (regex-string)
+  (progn
+    (defparameter trans-table (make-array 50))
+    (defparameter index-trans-table 0))
+  (parse-regex regex-string))
 
 (defun parse-regex (regex-string)
   "PARSE-REGEX
