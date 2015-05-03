@@ -44,6 +44,10 @@
   (1- index-trans-table))
 
 (defun make-dfa (regex-string)
+  "MAKE-DFA
+   return a dfa.
+   using GLOBAL parameters and ugly. Hence I will fix it later.
+   RETURN: *TODO*"
   (progn
     (defparameter trans-table (make-array 50))
     (defparameter index-trans-table 0))
@@ -54,6 +58,13 @@
    parse a regex-string recursively.
    RETURN:(lst begin-index end-index length+2)
    "
+  (defun get-ret (key parse-ret)
+    "GET-RET
+     get value by keyword from return of PARSE-REGEX
+     RETURN: numbers"
+    (cond ((eq 'begin key) (nth 0 parse-ret))
+          ((eq 'end   key) (nth 1 parse-ret))
+          ((eq 'lenth key) (nth 2 parse-ret))))
   (let ((current-char nil)
         (begin-index nil)
         (end-index nil)
@@ -69,6 +80,7 @@
                (deal-with-paren rest-regex)
                ))
             (t (progn
+                 ; Simple State
                  (let ((s-index (add-state current-char nil)))
                    (cond ((= 0 index) (setf begin-index s-index))
                          ((= (1- len)) (setf end-index s-index)))
@@ -82,7 +94,25 @@
   (let ((begin-index nil)
         (end-index nil)
         (len (string-length rest-regex)))
+    (if (is-union rest-regex)
+      (if (not (union-ugly-p rest-regex))
+        ()))
     ))
+
+(defun make-union (union-string)
+  "MAKE-UNION
+   make union states.
+   RETURN:(lst begin-index end-index length+2)"
+  (let* ((begin-index (add-state nil '♂))
+         (end-index   (add-state nil '♂))
+         (split-cons (split-cons (split-union union-string)))
+         (regex1 (car split-cons))
+         (regex2 (cdr split-cons)))
+    (progn ; fuck regex1
+      (let ()))
+    (progn ; fuck regex2
+      (let ()))))
+
 
 (defun get-first-paren (regex-string)
   "GET-FIRST-PAREN
