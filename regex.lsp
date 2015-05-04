@@ -105,13 +105,22 @@
    RETURN:(lst begin-index end-index length+2)"
   (let* ((begin-index (add-state nil '♂))
          (end-index   (add-state nil '♂))
-         (split-cons (split-cons (split-union union-string)))
+         (len         (string-length union-string))
+         (split-cons  (split-cons (split-union union-string)))
          (regex1 (car split-cons))
          (regex2 (cdr split-cons)))
     (progn ; fuck regex1
-      (let ()))
-    (progn ; fuck regex2
-      (let ()))))
+      (let* ((ret-parse    (parse-regex regex1))
+             (begin1-index (get-ret 'begin ret-parse))
+             (end1-index   (get-ret 'end   ret-parse)))
+        (setf (state-out1 (aref trans-table begin-index)) begin1-index)
+        (setf (state-out1 (aref trans-table end1-index)) end-index)))
+      (let* ((ret-parse    (parse-regex regex2))
+             (begin2-index (get-ret 'begin ret-parse))
+             (end2-index   (get-ret 'end   ret-parse)))
+        (setf (state-out2 (aref trans-table begin-index)) begin2-index)
+        (setf (state-out1 (aref trans-table end2-index)) end-index))
+      ))
 
 
 (defun get-first-paren (regex-string)
