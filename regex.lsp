@@ -120,7 +120,7 @@
              (end2-index   (get-ret 'end   ret-parse)))
         (setf (state-out2 (aref trans-table begin-index)) begin2-index)
         (setf (state-out1 (aref trans-table end2-index)) end-index))
-      ))
+      (list begin-index end-index (+2 len))))
 
 
 (defun get-first-paren (regex-string)
