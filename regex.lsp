@@ -76,9 +76,9 @@
                (add-state nil 'finish)
                (return)))
             ((eq #\( current-char)
-             (let (rest-regex (subseq regex-string index))
-               (deal-with-paren rest-regex)
-               ))
+             (let* ((rest-regex (subseq regex-string index))
+                    (paren (get-first-paren ())))
+               )
             (t (progn
                  ; Simple State
                  (let ((s-index (add-state current-char nil)))
@@ -88,7 +88,7 @@
                          (1+ s-index)))))))
     (list begin-index end-index (+ 2 len))))
 
-(defun deal-with-paren (rest-regex)
+(defun deal-with-paren (paren-regex)
   "DEAL-WITH-PAREN
    RETURN:(lst begin-index end-index length+2)"
   (let ((begin-index nil)
@@ -96,7 +96,7 @@
         (len (string-length rest-regex)))
     (if (is-union rest-regex)
       (if (not (union-ugly-p rest-regex))
-        ()))
+        (let ((ret-parse (make-union rest-regex)))
     ))
 
 (defun make-union (union-string)
