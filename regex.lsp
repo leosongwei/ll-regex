@@ -70,7 +70,8 @@
                (return)))
             ((eq #\( current-char)
              (let* ((rest-regex (subseq regex-string index))
-                    (paren (get-first-paren ())))
+                    (ret-parse  (deal-with-paren
+                                  (get-first-paren rest-regex))))
                )
             (t (progn
                  ; Simple State
