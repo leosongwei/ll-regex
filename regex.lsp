@@ -94,17 +94,20 @@
    RETURN:(lst begin-index end-index length+2)"
   (let ((begin-index nil)
         (end-index nil)
-        (len (string-length rest-regex)))
-    (if (is-union rest-regex)
-      ; union
-      (if (not (union-ugly-p rest-regex))
-        (let ((ret-parse (make-union rest-regex)))
+        (len (string-length paren-regex)))
+    (if (is-union paren-regex)
+      ; union paren
+      (if (not (union-ugly-p paren-regex))
+        (let ((ret-parse (make-union paren-regex)))
           (setf begin-index (get-ret 'begin ret-parse))
           (setf end-index   (get-ret 'end   ret-parse))
           (list begin-index end-index (+ 2 len)))
         (error "deal-with-paren: ugly union!"))
-      ; simple
-      (
+      ; simple paren
+      (let ((ret-parse (parse-regex paren-regex)))
+        (setf begin-index (get-ret 'begin ret-parse))
+        (setf end-index   (get-ret 'end   ret-parse))
+        (list begin-index end-index (+ 2 len))))))
 
 (defun make-union (union-string)
   "MAKE-UNION
