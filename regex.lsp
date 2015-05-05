@@ -58,13 +58,6 @@
    parse a regex-string recursively.
    RETURN:(lst begin-index end-index length+2)
    "
-  (defun get-ret (key parse-ret)
-    "GET-RET
-     get value by keyword from return of PARSE-REGEX
-     RETURN: numbers"
-    (cond ((eq 'begin key) (nth 0 parse-ret))
-          ((eq 'end   key) (nth 1 parse-ret))
-          ((eq 'lenth key) (nth 2 parse-ret))))
   (let ((current-char nil)
         (begin-index nil)
         (end-index nil)
@@ -86,7 +79,15 @@
                          ((= (1- len)) (setf end-index s-index)))
                    (setf (state-out1 (aref trans-table s-index))
                          (1+ s-index)))))))
-    (list begin-index end-index (+ 2 len))))
+    (list begin-index end-index (+ 2 len)))))
+
+(defun get-ret (key parse-ret)
+  "GET-RET
+   get value by keyword from return of PARSE-REGEX
+   RETURN: numbers"
+  (cond ((eq 'begin key) (nth 0 parse-ret))
+        ((eq 'end   key) (nth 1 parse-ret))
+        ((eq 'lenth key) (nth 2 parse-ret))))
 
 (defun deal-with-paren (paren-regex)
   "DEAL-WITH-PAREN
@@ -95,9 +96,15 @@
         (end-index nil)
         (len (string-length rest-regex)))
     (if (is-union rest-regex)
+      ; union
       (if (not (union-ugly-p rest-regex))
         (let ((ret-parse (make-union rest-regex)))
-    ))
+          (setf begin-index (get-ret 'begin ret-parse))
+          (setf end-index   (get-ret 'end   ret-parse))
+          (list begin-index end-index (+ 2 len)))
+        (error "deal-with-paren: ugly union!"))
+      ; simple
+      (
 
 (defun make-union (union-string)
   "MAKE-UNION
