@@ -15,10 +15,6 @@
   (defparameter trans-table (make-array 50))
   (defparameter index-trans-table 0))
 
-;♂
-(list '♂)
-(eq '♂ '♂)
-
 (defstruct (state (:print-function print-state))
   (attrib nil)
   (match nil)
@@ -114,8 +110,8 @@
   "MAKE-UNION
    make union states.
    RETURN:(lst begin-index end-index length+2)"
-  (let* ((begin-index (add-state nil '♂))
-         (end-index   (add-state nil '♂))
+  (let* ((begin-index (add-state nil '∈))
+         (end-index   (add-state nil '∈))
          (len         (string-length union-string))
          (split-cons  (split-cons (split-union union-string)))
          (regex1 (car split-cons))
