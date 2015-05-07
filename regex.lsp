@@ -87,13 +87,11 @@
               ((eq #\( current-char)
                (let* ((rest-exp (subseq regex-string index))
                       (paren-exp (get-first-paren rest-exp))
-                      (parse-ret nil))
-                 (if (is-union paren-exp)
-                   (if (not (union-ugly-p paren-exp))
-                     ()))
-                 (set-begin-end-f (get-ret 'begin parse-ret)
-                                  (get-ret 'end   parse-ret))
-                 (incf index (1- (get-ret 'len parse-ret)))))
+                      (ret-parse nil))
+                 (setf ret-parse (deal-with-paren paren-exp))
+                 (set-begin-end-f (get-ret 'begin ret-parse)
+                                  (get-ret 'end   ret-parse))
+                 (incf index (1- (get-ret 'len ret-parse)))))
               (t (progn
                    ; Simple State
                    (let ((s-index (add-state current-char nil)))
@@ -138,7 +136,7 @@
   (let* ((begin-index (add-state nil '∈))
          (end-index   (add-state nil '∈))
          (len         (string-length union-string))
-         (split-cons  (split-cons (split-union union-string)))
+         (split-cons (split-union union-string))
          (regex1 (car split-cons))
          (regex2 (cdr split-cons)))
     (let* ((ret-parse    (parse-regex regex1))
@@ -151,7 +149,7 @@
            (end2-index   (get-ret 'end   ret-parse)))
       (setf (state-out2 (aref trans-table begin-index)) begin2-index)
       (setf (state-out1 (aref trans-table end2-index)) end-index))
-    (list begin-index end-index (+2 len))))
+    (list begin-index end-index (+ 2 len))))
 
 
 (defun get-first-paren (regex-string)
