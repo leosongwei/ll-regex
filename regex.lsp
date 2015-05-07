@@ -12,8 +12,16 @@
 ;}}}
 
 (progn
-  (defparameter trans-table (make-array 50))
+  (defparameter trans-table (make-array 100))
   (defparameter index-trans-table 0))
+
+(array-dimension trans-table 0)
+
+(defun print-trans-table ()
+  (dotimes (index (array-dimension trans-table 0))
+    (if (eq 0 (aref trans-table index))
+      (return))
+    (format t "~A: ~A~%" index (aref trans-table index))))
 
 (defstruct (state (:print-function print-state))
   (attrib nil)
@@ -47,6 +55,8 @@
   (progn
     (defparameter trans-table (make-array 50))
     (defparameter index-trans-table 0))
+  (setf regex-string
+        (concatenate 'string regex-string "♂"))
   (parse-regex regex-string))
 
 (defun parse-regex (regex-string)
@@ -54,29 +64,44 @@
    parse a regex-string recursively.
    RETURN:(lst begin-index end-index length+2)
    "
-  (let ((current-char nil)
-        (begin-index nil)
-        (end-index nil)
+  (let ((current-char     nil)
+        (begin-index      nil)
+        (end-index        nil)
+        (last-begin-index nil)
+        (last-end-index   nil)
+        (begin?           t)
         (len (string-length regex-string)))
-    (dotimes (index (string-length regex-string))
-      (setf current-char (get-char regex-string index))
-      (cond ((eq #\♂ current-char)
-             (progn
-               (add-state nil 'finish)
-               (return)))
-            ((eq #\( current-char)
-             (let* ((rest-regex (subseq regex-string index))
-                    (ret-parse  (deal-with-paren
-                                  (get-first-paren rest-regex))))
-               )
-            (t (progn
-                 ; Simple State
-                 (let ((s-index (add-state current-char nil)))
-                   (cond ((= 0 index) (setf begin-index s-index))
-                         ((= (1- len)) (setf end-index s-index)))
-                   (setf (state-out1 (aref trans-table s-index))
-                         (1+ s-index)))))))
-    (list begin-index end-index (+ 2 len)))))
+    (labels ((set-begin-end-f (begin end)
+               (if begin?
+                 (progn (setf begin? nil)
+                        (setf begin-index begin)))
+               (setf last-begin-index begin)
+               (setf end-index end)
+               (setf last-end-index end)))
+      (dotimes (index (string-length regex-string))
+        (setf current-char (get-char regex-string index))
+        (cond ((eq #\♂ current-char)
+               (progn
+                 (add-state nil 'finish)
+                 (return)))
+              ((eq #\( current-char)
+               (let* ((rest-exp (subseq regex-string index))
+                      (paren-exp (get-first-paren rest-exp))
+                      (parse-ret nil))
+                 (if (is-union paren-exp)
+                   (if (not (union-ugly-p paren-exp))
+                     ()))
+                 (set-begin-end-f (get-ret 'begin parse-ret)
+                                  (get-ret 'end   parse-ret))
+                 (incf index (1- (get-ret 'len parse-ret)))))
+              (t (progn
+                   ; Simple State
+                   (let ((s-index (add-state current-char nil)))
+                     (set-begin-end-f s-index s-index)
+                     (setf (state-out1 (aref trans-table s-index))
+                           (1+ s-index)))))
+              ))
+      (list begin-index end-index (+ 2 len)))))
 
 (defun get-ret (key parse-ret)
   "GET-RET
@@ -84,7 +109,7 @@
    RETURN: numbers"
   (cond ((eq 'begin key) (nth 0 parse-ret))
         ((eq 'end   key) (nth 1 parse-ret))
-        ((eq 'lenth key) (nth 2 parse-ret))))
+        ((eq 'len key) (nth 2 parse-ret))))
 
 (defun deal-with-paren (paren-regex)
   "DEAL-WITH-PAREN
