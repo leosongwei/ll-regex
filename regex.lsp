@@ -79,9 +79,8 @@
                (let* ((rest-exp (subseq regex-string index))
                       (paren-exp (get-first-paren rest-exp))
                       (ret-parse nil))
-                 (setf ret-parse (deal-with-paren paren-exp))
-                 (setf (state-out1 (aref trans-table last-end-index))
-                       (get-ret 'begin ret-parse))
+                 (setf ret-parse
+                       (deal-with-paren paren-exp last-end-index))
                  (set-begin-end-f (get-ret 'begin ret-parse)
                                   (get-ret 'end   ret-parse))
                  (incf index (1- (get-ret 'len ret-parse)))))
@@ -106,7 +105,7 @@
         ((eq 'end   key) (nth 1 parse-ret))
         ((eq 'len key) (nth 2 parse-ret))))
 
-(defun deal-with-paren (paren-regex)
+(defun deal-with-paren (paren-regex last-end-index)
   "DEAL-WITH-PAREN
    RETURN:(lst begin-index end-index length+2)"
   (let ((begin-index nil)
@@ -115,7 +114,7 @@
     (if (is-union paren-regex)
       ; union paren
       (if (not (union-ugly-p paren-regex))
-        (let ((ret-parse (make-union paren-regex)))
+        (let ((ret-parse (make-union paren-regex last-end-index)))
           (setf begin-index (get-ret 'begin ret-parse))
           (setf end-index   (get-ret 'end   ret-parse))
           (list begin-index end-index (+ 2 len)))
@@ -126,11 +125,11 @@
         (setf end-index   (get-ret 'end   ret-parse))
         (list begin-index end-index (+ 2 len))))))
 
-(defun make-union (union-string)
+(defun make-union (union-string last-end-index)
   "MAKE-UNION
    make union states.
    RETURN:(lst begin-index end-index length+2)"
-  (let* ((begin-index (add-state nil '∈))
+  (let* ((begin-index last-end-index)
          (end-index   (add-state nil '∈))
          (len         (string-length union-string))
          (split-cons (split-union union-string))
