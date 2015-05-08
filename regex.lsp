@@ -35,11 +35,14 @@
           (state-out1 state)
           (state-out2 state)))
 
+(defmacro access-state (index)
+  `(aref trans-table ,index))
+
 (defun add-state (match attrib)
   "ADD-STATE
    make a state and add it to TRANS-TABLE.
    RETURN: new state location"
-  (setf (aref trans-table index-trans-table)
+  (setf (access-state index-trans-table)
         (let ((s (make-state)))
           (setf (state-match s) match)
           (setf (state-attrib s) attrib)
@@ -57,7 +60,7 @@
     (defparameter index-trans-table 0))
   (let* ((ret-parse (parse-regex regex-string))
          (finish (get-ret 'end ret-parse)))
-    (setf (state-attrib (aref trans-table finish)) 'fi))
+    (setf (state-attrib (access-state finish)) 'fi))
   (print-trans-table))
 
 (defun parse-regex (regex-string &optional begin)
@@ -87,11 +90,11 @@
                  (incf index (1- (get-ret 'len ret-parse)))))
               (t ; Simple State
                (let ((s-index (add-state nil '∈)))
-                 (setf (state-out1 (aref trans-table last-end-index))
+                 (setf (state-out1 (access-state last-end-index))
                        s-index)
-                 (setf (state-attrib (aref trans-table last-end-index))
+                 (setf (state-attrib (access-state last-end-index))
                        nil)
-                 (setf (state-match (aref trans-table last-end-index))
+                 (setf (state-match (access-state last-end-index))
                        current-char)
                  (set-begin-end-f last-end-index s-index)
                  ))
@@ -139,13 +142,13 @@
     (let* ((ret-parse    (parse-regex regex1))
            (begin1-index (get-ret 'begin ret-parse))
            (end1-index   (get-ret 'end   ret-parse)))
-      (setf (state-out1 (aref trans-table begin-index)) begin1-index)
-      (setf (state-out1 (aref trans-table end1-index)) end-index))
+      (setf (state-out1 (access-state begin-index)) begin1-index)
+      (setf (state-out1 (access-state end1-index)) end-index))
     (let* ((ret-parse    (parse-regex regex2))
            (begin2-index (get-ret 'begin ret-parse))
            (end2-index   (get-ret 'end   ret-parse)))
-      (setf (state-out2 (aref trans-table begin-index)) begin2-index)
-      (setf (state-out1 (aref trans-table end2-index)) end-index))
+      (setf (state-out2 (access-state begin-index)) begin2-index)
+      (setf (state-out1 (access-state end2-index)) end-index))
     (list begin-index end-index (+ 2 len))))
 
 
