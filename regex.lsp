@@ -60,14 +60,16 @@
     (setf (state-attrib (aref trans-table finish)) 'fi))
   (print-trans-table))
 
-(defun parse-regex (regex-string)
+(defun parse-regex (regex-string &optional begin)
   "PARSE-REGEX
    parse a regex-string recursively.
    RETURN:(lst begin-index end-index length+2)
    "
   (let* ((current-char     nil)
-         (initial-state    (add-state nil '∈))
-         (last-begin-index nil)
+         (initial-state    (if begin
+                             begin
+                             (add-state nil '∈)))
+         (last-begin-index initial-state)
          (last-end-index   initial-state)
          (len (string-length regex-string)))
     (labels ((set-begin-end-f (begin end)
@@ -78,9 +80,8 @@
         (cond ((eq #\( current-char)
                (let* ((rest-exp (subseq regex-string index))
                       (paren-exp (get-first-paren rest-exp))
-                      (ret-parse nil))
-                 (setf ret-parse
-                       (deal-with-paren paren-exp last-end-index))
+                      (ret-parse
+                        (deal-with-paren paren-exp last-end-index)))
                  (set-begin-end-f (get-ret 'begin ret-parse)
                                   (get-ret 'end   ret-parse))
                  (incf index (1- (get-ret 'len ret-parse)))))
