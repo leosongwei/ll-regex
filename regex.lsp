@@ -121,7 +121,7 @@
           (list begin-index end-index (+ 2 len)))
         (error "deal-with-paren: ugly union!"))
       ; simple paren
-      (let ((ret-parse (parse-regex paren-regex)))
+      (let ((ret-parse (parse-regex paren-regex last-end-index)))
         (setf begin-index (get-ret 'begin ret-parse))
         (setf end-index   (get-ret 'end   ret-parse))
         (list begin-index end-index (+ 2 len))))))
