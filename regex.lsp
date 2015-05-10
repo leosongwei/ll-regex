@@ -90,12 +90,12 @@
                (setf last-end-index end)))
       (dotimes (index (string-length regex-string))
         (setf current-char (get-char regex-string index))
-        (inspector #\b)
         (cond ((eq #\( current-char)
                (let* ((rest-exp (subseq regex-string index))
                       (paren-exp (get-first-paren rest-exp))
                       (ret-parse
                         (deal-with-paren paren-exp last-end-index)))
+                 (format t "lei: ~A~%" last-end-index)
                  (set-begin-end-f (get-ret 'begin ret-parse)
                                   (get-ret 'end   ret-parse))
                  (incf index (1- (get-ret 'len ret-parse)))))
@@ -109,17 +109,25 @@
                  (setf (state-out2 (access-state start)) end)
                  (setf (state-out1 (access-state paren-end)) end)
                  (setf (state-out2 (access-state paren-end)) paren-start)
-                 ;(setf last-begin-index last-begin-index)
                  (setf last-end-index end)
                  ))
-              (t ; Simple State
-               (let ((s-index (add-state current-char nil)))
-                 (if start?
-                   nil
-                   (setf (state-out1 (access-state last-end-index)) s-index))
-                 (set-begin-end-f s-index s-index)
-                 ))
-              ))
+              (t ; Simple State, algorithm: ♂
+               (if start?
+                 (progn
+                   (setf start? nil)
+                   (let ((new-s (add-state current-char nil)))
+                     (setf begin-index new-s)
+                     (set-begin-end-f new-s new-s)))
+                 (if (and (null (state-match (access-state last-end-index)))
+                          (null (state-attrib (access-state last-end-index))))
+                   (progn
+                     (setf (state-match (access-state last-end-index))
+                           current-char)
+                     (set-begin-end-f last-end-index last-end-index))
+                   (let ((new-s (add-state current-char nil)))
+                     (setf (state-out1 (access-state last-end-index)) new-s)
+                     (set-begin-end-f new-s new-s))))
+               )))
       (list begin-index last-end-index (+ 2 len)))))
 
 (defun get-ret (key parse-ret)
@@ -142,7 +150,7 @@
         (let ((ret-parse (make-union paren-regex last-end-index)))
           (setf begin-index (get-ret 'begin ret-parse))
           (setf end-index   (get-ret 'end   ret-parse))
-          (list begin-index end-index (+ 2 len)))
+          (list last-end-index end-index (+ 2 len)))
         (error "deal-with-paren: ugly union!"))
       ; simple paren
       (let ((ret-parse (parse-regex paren-regex last-end-index)))
@@ -154,24 +162,32 @@
   "MAKE-UNION
    make union states.
    RETURN:(lst begin-index end-index length+2)"
-  (let* ((begin-index last-end-index)
-         (end-index   (add-state nil '∈))
+  (let* ((begin-index (add-state nil '∈))
+         (end-index   (add-state nil nil))
          (len         (string-length union-string))
          (split-cons (split-union union-string))
          (regex1 (car split-cons))
          (regex2 (cdr split-cons)))
-    (let* ((ret-parse    (parse-regex regex1))
-           (begin1-index (get-ret 'begin ret-parse))
-           (end1-index   (get-ret 'end   ret-parse)))
+    (setf (state-out1 (access-state last-end-index)) begin-index)
+    (let* ((ret-parse     (parse-regex regex1))
+           (begin1-index  (get-ret 'begin ret-parse))
+           (last1-index   (get-ret 'end   ret-parse))
+           (sub-end-index (add-state nil '∈)))
       (setf (state-out1 (access-state begin-index)) begin1-index)
-      (setf (state-out1 (access-state end1-index)) end-index))
-    (let* ((ret-parse    (parse-regex regex2))
-           (begin2-index (get-ret 'begin ret-parse))
-           (end2-index   (get-ret 'end   ret-parse)))
-      (setf (state-out2 (access-state begin-index)) begin2-index)
-      (setf (state-out1 (access-state end2-index)) end-index))
+      (format t "node ~A: ~A b1i:~A~%"
+              begin-index (access-state begin-index) begin1-index)
+      (setf (state-out1 (access-state last1-index)) sub-end-index)
+      (setf (state-out1 (access-state sub-end-index)) end-index))
+    (let* ((ret-parse     (parse-regex regex2))
+           (begin1-index  (get-ret 'begin ret-parse))
+           (last1-index   (get-ret 'end   ret-parse))
+           (sub-end-index (add-state nil '∈)))
+      (setf (state-out2 (access-state begin-index)) begin1-index)
+      (format t "node ~A: ~A b1i:~A~%"
+              begin-index (access-state begin-index) begin1-index)
+      (setf (state-out1 (access-state last1-index)) sub-end-index)
+      (setf (state-out1 (access-state sub-end-index)) end-index))
     (list last-end-index end-index (+ 2 len))))
-
 
 (defun get-first-paren (regex-string)
   "GET-FIRST-PAREN
