@@ -95,7 +95,6 @@
                       (paren-exp (get-first-paren rest-exp))
                       (ret-parse
                         (deal-with-paren paren-exp last-end-index)))
-                 (format t "lei: ~A~%" last-end-index)
                  (set-begin-end-f (get-ret 'begin ret-parse)
                                   (get-ret 'end   ret-parse))
                  (incf index (1- (get-ret 'len ret-parse)))))
@@ -174,8 +173,6 @@
            (last1-index   (get-ret 'end   ret-parse))
            (sub-end-index (add-state nil '∈)))
       (setf (state-out1 (access-state begin-index)) begin1-index)
-      (format t "node ~A: ~A b1i:~A~%"
-              begin-index (access-state begin-index) begin1-index)
       (setf (state-out1 (access-state last1-index)) sub-end-index)
       (setf (state-out1 (access-state sub-end-index)) end-index))
     (let* ((ret-parse     (parse-regex regex2))
@@ -183,8 +180,6 @@
            (last1-index   (get-ret 'end   ret-parse))
            (sub-end-index (add-state nil '∈)))
       (setf (state-out2 (access-state begin-index)) begin1-index)
-      (format t "node ~A: ~A b1i:~A~%"
-              begin-index (access-state begin-index) begin1-index)
       (setf (state-out1 (access-state last1-index)) sub-end-index)
       (setf (state-out1 (access-state sub-end-index)) end-index))
     (list last-end-index end-index (+ 2 len))))
