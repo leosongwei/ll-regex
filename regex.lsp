@@ -118,6 +118,17 @@
                  (add-out paren-end paren-start)
                  (setf last-end-index end)
                  ))
+              ((eq #\+ current-char)
+               (let ((start (add-state nil '∈))
+                     (end   (add-state nil '∈))
+                     (paren-start (state-out1 (access-state last-begin-index)))
+                     (paren-end   last-end-index))
+                 (setf (state-out1 (access-state last-begin-index)) start)
+                 (add-out start paren-start)
+                 (add-out paren-end end)
+                 (add-out paren-end paren-start)
+                 (setf last-end-index end)
+                 ))
               (t ; Simple State, algorithm: ♂
                (if start?
                  (progn
