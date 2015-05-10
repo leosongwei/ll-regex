@@ -38,6 +38,14 @@
 (defmacro access-state (index)
   `(aref trans-table ,index))
 
+(defun add-out (state out)
+  "ADD-OUT
+   RETURN: nil"
+  (cond ((null (state-out1 (access-state state)))
+         (setf (state-out1 (access-state state)) out))
+        (t
+         (setf (state-out2 (access-state state)) out))))
+
 (defun add-state (match attrib)
   "ADD-STATE
    make a state and add it to TRANS-TABLE.
@@ -61,7 +69,7 @@
   (let* ((ret-parse (parse-regex regex-string))
          (last-one (get-ret 'end ret-parse))
          (finish (add-state nil 'fi)))
-    (setf (state-out1 (access-state last-one)) finish))
+    (add-out last-one finish))
   (print-trans-table))
 
 (defmacro inspector (char)
@@ -104,10 +112,10 @@
                      (paren-start (state-out1 (access-state last-begin-index)))
                      (paren-end   last-end-index))
                  (setf (state-out1 (access-state last-begin-index)) start)
-                 (setf (state-out1 (access-state start)) paren-start)
-                 (setf (state-out2 (access-state start)) end)
-                 (setf (state-out1 (access-state paren-end)) end)
-                 (setf (state-out2 (access-state paren-end)) paren-start)
+                 (add-out start paren-start)
+                 (add-out start end)
+                 (add-out paren-end end)
+                 (add-out paren-end paren-start)
                  (setf last-end-index end)
                  ))
               (t ; Simple State, algorithm: ♂
