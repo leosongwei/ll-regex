@@ -178,27 +178,6 @@
       (add-out sub-end-index end-index))
     (list last-end-index end-index (+ 2 len))))
 
-(defun get-first-paren (regex-string)
-  "GET-FIRST-PAREN
-   get first sub regex string from regex-string like '(sub)xxxx'
-   will be triggered when caller meet an '('
-   RETURN: sub regex string"
-  (let ((paren-level 0)
-        (string-buff "")
-        (current-char nil))
-    (dotimes (index (string-length regex-string))
-      (setf current-char (get-char regex-string index))
-      (cond ((eq #\( current-char) (incf paren-level))
-            ((eq #\) current-char) (decf paren-level)))
-      (setf string-buff (add-char-to-string current-char string-buff))
-      (if (= 0 paren-level)
-        (return))
-      (if (= index (1- (string-length regex-string)))
-        (error "get-first-paren: regex paren not closed")))
-    (setf string-buff
-          (subseq string-buff 1 (1- (string-length string-buff))))))
-
-
 (defun is-union (paren-lst)
   "IS-UNION
    say if a paren-lst is an union.
