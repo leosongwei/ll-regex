@@ -210,35 +210,3 @@
       (if (not (cdr (split-by-sym split-result nil #\|)))
         t nil)
       nil)))
-
-(defun union-ugly-p (regex-string)
-  "UGLY-UNION-P
-   say if an union is 'ugly'(start or end with |),
-   avoid construction of broken union NFA.
-   INPUT: MUST be a union!
-   RETURN: t nil"
-  (let* ((first-char (get-char regex-string 0))
-         (last-char  (get-char regex-string
-                               (1- (string-length regex-string)))))
-    (if (or (eq #\| last-char)
-            (eq #\| first-char))
-      t nil)))
-
-(defun split-union (regex-string)
-  "SPLIT-UNION
-   split a union regex string into 2 pices of regex string.
-   don't split ugly union.
-   RETURN: (cons regex1 regex2)"
-  (let ((split-location nil)
-        (current-char nil)
-        (paren-level 0))
-    (setf split-location
-          (dotimes (index (string-length regex-string))
-            (setf current-char (get-char regex-string index))
-            (cond ((eq #\( current-char) (incf paren-level))
-                  ((eq #\) current-char) (decf paren-level))
-                  ((and (eq #\| current-char)
-                        (= 0 paren-level))
-                   (return index)))))
-    (cons (subseq regex-string 0 split-location)
-          (subseq regex-string (1+ split-location)))))
