@@ -94,26 +94,23 @@
                (decf paren-level)
                (labels
                  ((reach-bp (stack result)
+                    "tail recursion, for speed."
                     (if (eq 'bp (car stack))
                       (cons result (cdr stack))
                       (reach-bp (cdr stack)
                                 (append result
                                         (list (car stack)))))))
-                 (let* ((counter 0)
-                        (rev-stack (reverse parse-stack))
+                 (let* ((rev-stack (reverse parse-stack))
                         (to-bp (reach-bp rev-stack nil))
                         (result-stack (reverse (car to-bp)))
                         (rest-stack (reverse (cdr to-bp))))
                    (setf parse-stack
                      (append rest-stack (list result-stack)))))))
-            (t
-             (progn
-               (setf parse-stack
-                     (append parse-stack
-                             (list current-char)))))))
-    parse-stack))
-
-(append '(a b c) (list 'd))
+               (t
+                (setf parse-stack
+                      (append parse-stack
+                              (list current-char))))))
+            parse-stack))
 
 (defun get-ret (key parse-ret)
   "GET-RET
