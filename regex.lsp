@@ -199,25 +199,17 @@
           (subseq string-buff 1 (1- (string-length string-buff))))))
 
 
-(defun is-union (regex-string)
+(defun is-union (paren-lst)
   "IS-UNION
-   say if exp is an UNION exp.
-   gets ERROR when exp not support (2 |).
+   say if a paren-lst is an union.
    RETURN: t nil"
-  (let ((counter 0)
-        (current-char nil)
-        (paren-level 0))
-    (dotimes (index (string-length regex-string))
-      (setf current-char (get-char regex-string index))
-      (cond ((eq #\( current-char) (incf paren-level))
-            ((eq #\) current-char) (decf paren-level)))
-      (if (and (eq #\| current-char)
-               (= 0 paren-level))
-        (incf counter)))
-    (cond ((= 1 counter) t)
-          ((> counter 1) (error "too many \"|\" !"))
-          ((= 0 counter) nil)
-          (t (error "This program has been fucked!")))))
+  (let ((split-result (split-by-sym paren-lst nil #\|)))
+    (if (and (car split-result)
+             (cdr split-result))
+      ; check if ugly
+      (if (not (cdr (split-by-sym split-result nil #\|)))
+        t nil)
+      nil)))
 
 (defun union-ugly-p (regex-string)
   "UGLY-UNION-P
