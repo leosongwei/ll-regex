@@ -13,7 +13,8 @@
 
 (progn
   (defparameter trans-table (make-array 100))
-  (defparameter index-trans-table 0))
+  (defparameter index-trans-table 0)
+  (defparameter parse-stack nil))
 
 (array-dimension trans-table 0)
 
@@ -74,75 +75,45 @@
       (add-out last-one finish)))
   (print-trans-table))
 
-(defun parse-regex (regex-string &optional begin)
+(defun parse-regex (regex-string)
   "PARSE-REGEX
-   parse a regex-string recursively.
-   RETURN:(lst begin-index end-index length+2)
-   "
-  (let* ((current-char     nil)
-         (begin-index      (if begin begin nil))
-         (last-begin-index nil)
-         (last-end-index   (if begin begin nil))
-         (start?           (if begin nil t))
-         (len (string-length regex-string)))
-    (labels ((set-begin-end-f (begin end)
-               (if start?
-                 (progn
-                   (setf start? nil)
-                   (setf begin-index begin)))
-               (setf last-begin-index begin)
-               (setf last-end-index end)))
-      (dotimes (index (string-length regex-string))
-        (setf current-char (get-char regex-string index))
-        (cond ((eq #\( current-char)
-               (let* ((rest-exp (subseq regex-string index))
-                      (paren-exp (get-first-paren rest-exp))
-                      (ret-parse
-                        (deal-with-paren paren-exp last-end-index)))
-                 (set-begin-end-f (get-ret 'begin ret-parse)
-                                  (get-ret 'end   ret-parse))
-                 (incf index (1- (get-ret 'len ret-parse)))))
-              ((eq #\* current-char)
-               (let ((start (add-state nil '∈))
-                     (end   (add-state nil '∈))
-                     (paren-start (state-out1 (access-state last-begin-index)))
-                     (paren-end   last-end-index))
-                 (setf (state-out1 (access-state last-begin-index)) start)
-                 (add-out start paren-start)
-                 (add-out start end)
-                 (add-out paren-end end)
-                 (add-out paren-end paren-start)
-                 (setf last-end-index end)
-                 ))
-              ((eq #\+ current-char)
-               (let ((start (add-state nil '∈))
-                     (end   (add-state nil '∈))
-                     (paren-start (state-out1 (access-state last-begin-index)))
-                     (paren-end   last-end-index))
-                 (setf (state-out1 (access-state last-begin-index)) start)
-                 (add-out start paren-start)
-                 (add-out paren-end end)
-                 (add-out paren-end paren-start)
-                 (setf last-end-index end)
-                 ))
-              (t ; Simple State, algorithm: ♂
-               (if start?
-                 (progn
-                   (setf start? nil)
-                   (let ((new-s (add-state current-char nil)))
-                     (setf begin-index new-s)
-                     (set-begin-end-f new-s new-s)))
-                 (if (and (null (state-match (access-state last-end-index)))
-                          (null (state-attrib (access-state last-end-index))))
-                   (progn
-                     (setf (state-match (access-state last-end-index))
-                           current-char)
-                     (set-begin-end-f last-end-index last-end-index))
-                   (let ((new-s (add-state current-char nil)))
-                     (add-out last-end-index new-s)
-                     (set-begin-end-f new-s new-s))))
-               )))
-      (list begin-index last-end-index (+ 2 len)))))
+   use box algorithm to parse regex-string.
+   RETURN: parse-tree (simple list)."
+  (setf parse-stack nil)
+  (let* ((current-char nil)
+         (paren-level 0))
+    (dotimes (index (string-length regex-string))
+      (setf current-char (get-char regex-string index))
+      (cond ((eq #\( current-char)
+             (progn
+               (incf paren-level)
+               (setf parse-stack
+                     (append parse-stack (list 'bp)))))
+            ((eq #\) current-char)
+             (progn
+               (decf paren-level)
+               (labels
+                 ((reach-bp (stack result)
+                    (if (eq 'bp (car stack))
+                      (cons result (cdr stack))
+                      (reach-bp (cdr stack)
+                                (append result
+                                        (list (car stack)))))))
+                 (let* ((counter 0)
+                        (rev-stack (reverse parse-stack))
+                        (to-bp (reach-bp rev-stack nil))
+                        (result-stack (reverse (car to-bp)))
+                        (rest-stack (reverse (cdr to-bp))))
+                   (setf parse-stack
+                     (append rest-stack (list result-stack)))))))
+            (t
+             (progn
+               (setf parse-stack
+                     (append parse-stack
+                             (list current-char)))))))
+    parse-stack))
+
+(append '(a b c) (list 'd))
 
 (defun get-ret (key parse-ret)
   "GET-RET
