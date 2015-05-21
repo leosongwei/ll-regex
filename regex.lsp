@@ -75,6 +75,19 @@
       (add-out last-one finish)))
   (print-trans-table))
 
+(defun split-by-sym (stack result sym)
+  "SPLIT-BY-SYM
+   split a one-level list by a given symbol.
+   RETURN: (cons sym-lst-before sym-lst-after)"
+  (if (not (null stack))
+    (if (eq sym (car stack))
+      (cons result (cdr stack))
+      (split-by-sym (cdr stack)
+                    (append result
+                            (list (car stack)))
+                    sym))
+    (cons result nil)))
+
 (defun parse-regex (regex-string)
   "PARSE-REGEX
    use box algorithm to parse regex-string.
@@ -92,25 +105,23 @@
             ((eq #\) current-char)
              (progn
                (decf paren-level)
-               (labels
-                 ((reach-bp (stack result)
-                    "tail recursion, for speed."
-                    (if (eq 'bp (car stack))
-                      (cons result (cdr stack))
-                      (reach-bp (cdr stack)
-                                (append result
-                                        (list (car stack)))))))
-                 (let* ((rev-stack (reverse parse-stack))
-                        (to-bp (reach-bp rev-stack nil))
-                        (result-stack (reverse (car to-bp)))
-                        (rest-stack (reverse (cdr to-bp))))
-                   (setf parse-stack
-                     (append rest-stack (list result-stack)))))))
-               (t
-                (setf parse-stack
-                      (append parse-stack
-                              (list current-char))))))
-            parse-stack))
+               (let* ((rev-stack (reverse parse-stack))
+                      (to-bp (split-by-sym rev-stack nil 'bp))
+                      (result-stack (reverse (car to-bp)))
+                      (rest-stack (reverse (cdr to-bp))))
+                 (setf parse-stack
+                       (append rest-stack (list result-stack))))))
+            ((or (eq #\* current-char)
+                 (eq #\+ current-char))
+             (let ((sym (cond ((eq #\* current-char) '*)
+                              ((eq #\+ current-char) '+))))
+               (setf parse-stack
+                     (append (butlast parse-stack)
+                             (list
+                               (list sym (car (last parse-stack))))))))
+            (t (setf parse-stack (append parse-stack
+                                         (list current-char))))))
+    parse-stack))
 
 (defun get-ret (key parse-ret)
   "GET-RET
