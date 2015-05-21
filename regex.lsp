@@ -93,6 +93,10 @@
    use box algorithm to parse regex-string.
    RETURN: parse-tree (simple list)."
   (setf parse-stack nil)
+  (setf regex-string (concatenate 'string
+                                  "("
+                                  regex-string
+                                  ")"))
   (let* ((current-char nil)
          (paren-level 0))
     (dotimes (index (string-length regex-string))
@@ -109,6 +113,13 @@
                       (to-bp (split-by-sym rev-stack nil 'bp))
                       (result-stack (reverse (car to-bp)))
                       (rest-stack (reverse (cdr to-bp))))
+                 (if (is-union result-stack)
+                   (let ((split-result
+                           (split-by-sym result-stack nil #\|)))
+                     (setf result-stack
+                           (list 'union
+                                 (car split-result)
+                                 (cdr split-result)))))
                  (setf parse-stack
                        (append rest-stack (list result-stack))))))
             ((or (eq #\* current-char)
