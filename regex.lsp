@@ -69,14 +69,10 @@
   (let* ((ret-parse (parse-regex regex-string))
          (last-one (get-ret 'end ret-parse))
          (finish (add-state nil 'fi)))
-    (add-out last-one finish))
+    (if (null (get-ret 'end ret-parse))
+      nil
+      (add-out last-one finish)))
   (print-trans-table))
-
-(defmacro inspector (char)
-  `(if (eq ,char current-char)
-     (progn
-       (format t "last-begin:~A~%" last-begin-index)
-       (format t "last-end  :~A~%" last-end-index))))
 
 (defun parse-regex (regex-string &optional begin)
   "PARSE-REGEX
