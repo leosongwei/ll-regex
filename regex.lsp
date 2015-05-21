@@ -38,6 +38,14 @@
 (defmacro access-state (index)
   `(aref trans-table ,index))
 
+(defun add-out (state out)
+  "ADD-OUT
+   RETURN: nil"
+  (cond ((null (state-out1 (access-state state)))
+         (setf (state-out1 (access-state state)) out))
+        (t
+         (setf (state-out2 (access-state state)) out))))
+
 (defun add-state (match attrib)
   "ADD-STATE
    make a state and add it to TRANS-TABLE.
@@ -61,14 +69,10 @@
   (let* ((ret-parse (parse-regex regex-string))
          (last-one (get-ret 'end ret-parse))
          (finish (add-state nil 'fi)))
-    (setf (state-out1 (access-state last-one)) finish))
+    (if (null (get-ret 'end ret-parse))
+      nil
+      (add-out last-one finish)))
   (print-trans-table))
-
-(defmacro inspector (char)
-  `(if (eq ,char current-char)
-     (progn
-       (format t "last-begin:~A~%" last-begin-index)
-       (format t "last-end  :~A~%" last-end-index))))
 
 (defun parse-regex (regex-string &optional begin)
   "PARSE-REGEX
@@ -104,10 +108,21 @@
                      (paren-start (state-out1 (access-state last-begin-index)))
                      (paren-end   last-end-index))
                  (setf (state-out1 (access-state last-begin-index)) start)
-                 (setf (state-out1 (access-state start)) paren-start)
-                 (setf (state-out2 (access-state start)) end)
-                 (setf (state-out1 (access-state paren-end)) end)
-                 (setf (state-out2 (access-state paren-end)) paren-start)
+                 (add-out start paren-start)
+                 (add-out start end)
+                 (add-out paren-end end)
+                 (add-out paren-end paren-start)
+                 (setf last-end-index end)
+                 ))
+              ((eq #\+ current-char)
+               (let ((start (add-state nil '∈))
+                     (end   (add-state nil '∈))
+                     (paren-start (state-out1 (access-state last-begin-index)))
+                     (paren-end   last-end-index))
+                 (setf (state-out1 (access-state last-begin-index)) start)
+                 (add-out start paren-start)
+                 (add-out paren-end end)
+                 (add-out paren-end paren-start)
                  (setf last-end-index end)
                  ))
               (t ; Simple State, algorithm: ♂
@@ -124,7 +139,7 @@
                            current-char)
                      (set-begin-end-f last-end-index last-end-index))
                    (let ((new-s (add-state current-char nil)))
-                     (setf (state-out1 (access-state last-end-index)) new-s)
+                     (add-out last-end-index new-s)
                      (set-begin-end-f new-s new-s))))
                )))
       (list begin-index last-end-index (+ 2 len)))))
@@ -167,21 +182,21 @@
          (split-cons (split-union union-string))
          (regex1 (car split-cons))
          (regex2 (cdr split-cons)))
-    (setf (state-out1 (access-state last-end-index)) begin-index)
+    (add-out last-end-index begin-index)
     (let* ((ret-parse     (parse-regex regex1))
            (begin1-index  (get-ret 'begin ret-parse))
            (last1-index   (get-ret 'end   ret-parse))
            (sub-end-index (add-state nil '∈)))
-      (setf (state-out1 (access-state begin-index)) begin1-index)
-      (setf (state-out1 (access-state last1-index)) sub-end-index)
-      (setf (state-out1 (access-state sub-end-index)) end-index))
+      (add-out begin-index begin1-index)
+      (add-out last1-index sub-end-index)
+      (add-out sub-end-index end-index))
     (let* ((ret-parse     (parse-regex regex2))
            (begin1-index  (get-ret 'begin ret-parse))
            (last1-index   (get-ret 'end   ret-parse))
            (sub-end-index (add-state nil '∈)))
-      (setf (state-out2 (access-state begin-index)) begin1-index)
-      (setf (state-out1 (access-state last1-index)) sub-end-index)
-      (setf (state-out1 (access-state sub-end-index)) end-index))
+      (add-out begin-index begin1-index)
+      (add-out last1-index sub-end-index)
+      (add-out sub-end-index end-index))
     (list last-end-index end-index (+ 2 len))))
 
 (defun get-first-paren (regex-string)
