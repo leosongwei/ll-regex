@@ -196,7 +196,7 @@
       t
       (is-union (cdr paren-lst)))))
 
-(defun split-union (paren-lst &optional (result nil) (current nil))
+(defun split-union (paren-lst &optional (result nil) (current nil) (flag nil))
   "SPLIT-UNION
    split union into pices.
    RETURN: (union pice1 pice2 ...)"
@@ -204,13 +204,17 @@
              (if current
                (progn
                  (setf result (append result (list (reverse current))))
+                 (if (null current)
+                   (setf flag '+))
                  (setf current nil)))))
     (if (null paren-lst)
       (progn
         (commit)
         (if (null result)
           nil
-          (cons 'union result)))
+          (if flag
+            (cons 'union result)
+            (list '+ (cons 'union result)))))
       (progn
         (if (eq #\| (car paren-lst))
           (commit)
