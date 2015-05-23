@@ -114,14 +114,11 @@
                       (result-stack (reverse (car to-bp)))
                       (rest-stack (reverse (cdr to-bp))))
                  (if (is-union result-stack)
-                   (let ((split-result
-                           (split-by-sym result-stack nil #\|)))
-                     (setf result-stack
-                           (list 'union
-                                 (car split-result)
-                                 (cdr split-result)))))
-                 (setf parse-stack
-                       (append rest-stack (list result-stack))))))
+                   (setf result-stack (split-union result-stack)))
+                 (if result-stack
+                   (setf parse-stack
+                         (append rest-stack (list result-stack)))
+                   (setf parse-stack rest-stack)))))
             ((or (eq #\* current-char)
                  (eq #\+ current-char))
              (let ((sym (cond ((eq #\* current-char) '*)
