@@ -193,10 +193,30 @@
   "IS-UNION
    say if a paren-lst is an union.
    RETURN: t nil"
-  (let ((split-result (split-by-sym paren-lst nil #\|)))
-    (if (and (car split-result)
-             (cdr split-result))
-      ; check if ugly
-      (if (not (cdr (split-by-sym split-result nil #\|)))
-        t nil)
-      nil)))
+  (if (null paren-lst)
+    nil
+    (if (eq #\| (car paren-lst))
+      t
+      (is-union (cdr paren-lst)))))
+
+(defun split-union (paren-lst &optional (result nil) (current nil))
+  "SPLIT-UNION
+   split union into pices.
+   RETURN: (union pice1 pice2 ...)"
+  (labels ((commit ()
+             (if current
+               (progn
+                 (setf result (append result (list (reverse current))))
+                 (setf current nil)))))
+    (if (null paren-lst)
+      (progn
+        (commit)
+        (if (null result)
+          nil
+          (cons 'union result)))
+      (progn
+        (if (eq #\| (car paren-lst))
+          (commit)
+          (push (car paren-lst) current))
+        (split-union (cdr paren-lst) result current)))))
+
