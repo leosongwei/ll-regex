@@ -196,9 +196,9 @@
       t
       (is-union (cdr paren-lst)))))
 
-(defun split-union (paren-lst &optional (result nil) (current nil) (flag nil))
+(defun split-union (paren-lst &optional result current flag)
   "SPLIT-UNION
-   split union into pices.
+   split union into pices, smartly :D
    RETURN: (union pice1 pice2 ...)"
   (labels ((commit ()
              (if current
@@ -219,5 +219,5 @@
         (if (eq #\| (car paren-lst))
           (commit)
           (push (car paren-lst) current))
-        (split-union (cdr paren-lst) result current)))))
+        (split-union (cdr paren-lst) result current flag)))))
 
