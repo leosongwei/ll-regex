@@ -53,17 +53,26 @@
     (defparameter index-trans-table 0)
     (defparameter parse-stack nil))
   (let* ((parse-tree (parse-regex regex-string))
-         (tail (make-nfa parse-tree))
-         (fi-s (add-state nil 'fi)))
-    (add-out tail fi-s)
+         (head (add-state nil nil))
+         (tail (make-nfa parse-tree head)))
+    (setf (state-attrib (access-state tail)) 'fi)
     (print-trans-table)
     ))
 
-(defun make-union (parse-tree))
+(defun make-union (parse-tree tail))
 
-(defun make-plus (parse-tree))
+(defun make-plus (parse-tree tail)
+  (format t "MAKE-PLUS: ~A, tail:~A~%" parse-tree tail)
+  (let* ((head (add-state nil '∈))
+        (paren-tail (make-nfa (cdr parse-tree) head))
+        (new-tail (add-state nil nil)))
+    (add-out tail head)
+    (setf (state-attrib (access-state paren-tail)) '∈)
+    (add-out paren-tail tail)))
 
-(defun make-nfa (parse-tree &optional last-one)
+(defun make-star (parse-tree tail))
+
+(defun make-nfa (parse-tree &optional tail)
   "MAKE-NFA
    using `caller-handler` mode to construct NFA from
    parse tree, recursively. (see SICP `eval-apply` mode)
@@ -79,14 +88,14 @@
       (cond ((consp current)
              (let* ((head (car current))
                     (tail
-                      (cond ((eq 'union head) (make-union current last-one))
-                            ((eq '+ head) (make-plus current last-one))
-                            ((eq '* head) (make-star current last-one))
-                            (t (make-nfa current last-one)))))
+                      (cond ((eq 'union head) (make-union current tail))
+                            ((eq '+ head) (make-plus current tail))
+                            ((eq '* head) (make-star current tail))
+                            (t (make-nfa current tail)))))
                (make-nfa (cdr parse-tree) tail)))
-            (t (let ((new-s (add-state current nil)))
-                 (if last-one
-                   (add-out last-one new-s))
+            (t (let ((new-s (add-state nil nil)))
+                 (add-out tail new-s)
+                 (setf (state-match (access-state tail)) current)
                  (make-nfa (cdr parse-tree) new-s)))))
-    last-one))
+    tail))
 
