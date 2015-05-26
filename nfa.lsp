@@ -62,13 +62,23 @@
 (defun make-union (parse-tree tail))
 
 (defun make-plus (parse-tree tail)
-  (format t "MAKE-PLUS: ~A, tail:~A~%" parse-tree tail)
-  (let* ((head (add-state nil '∈))
-        (paren-tail (make-nfa (cdr parse-tree) head))
-        (new-tail (add-state nil nil)))
-    (add-out tail head)
-    (setf (state-attrib (access-state paren-tail)) '∈)
-    (add-out paren-tail tail)))
+  "MAKE-PLUS
+   constructs kleene plus regex.
+   RETURN: tail index"
+  (let* ((last-tail (if tail
+                      (progn
+                        (setf (state-attrib (access-state tail)) '∈)
+                        tail)
+                      (add-state nil '∈)))
+         (p-head (let ((h (add-state nil nil)))
+                   (setf (state-out1 (access-state last-tail)) h)
+                   h))
+         (p-tail (make-nfa (cdr parse-tree) p-head))
+         (new-tail (let ((l (add-state nil nil)))
+                     (setf (state-attrib (access-state p-tail)) '∈)
+                     (setf (state-out1 (access-state p-tail)) p-head)
+                     (setf (state-out2 (access-state p-tail)) l))))
+    new-tail))
 
 (defun make-star (parse-tree tail))
 
@@ -93,9 +103,14 @@
                             ((eq '* head) (make-star current tail))
                             (t (make-nfa current tail)))))
                (make-nfa (cdr parse-tree) tail)))
-            (t (let ((new-s (add-state nil nil)))
-                 (add-out tail new-s)
-                 (setf (state-match (access-state tail)) current)
-                 (make-nfa (cdr parse-tree) new-s)))))
+            (t (if (= 0 index-trans-table)
+                 (let* ((head (add-state current nil))
+                        (tail (add-state nil nil)))
+                   (setf (state-out1 (access-state head)) tail)
+                   (make-nfa (cdr parse-tree) tail))
+                 (let* ((new-tail (add-state nil nil)))
+                   (setf (state-match (access-state tail)) current)
+                   (setf (state-out1 (access-state tail)) new-tail)
+                   (make-nfa (cdr parse-tree) new-tail))))))
     tail))
 
