@@ -80,7 +80,25 @@
                      (setf (state-out2 (access-state p-tail)) l))))
     new-tail))
 
-(defun make-star (parse-tree tail))
+(defun make-star (parse-tree tail)
+  "MAKE-STAR
+   constructs kleene star regex.
+   RETURN: tail index"
+  (let* ((last-tail (if tail
+                      (progn
+                        (setf (state-attrib (access-state tail)) '∈)
+                        tail)
+                      (add-state nil '∈)))
+         (p-head (let ((h (add-state nil nil)))
+                   (setf (state-out1 (access-state last-tail)) h)
+                   h))
+         (p-tail (make-nfa (cdr parse-tree) p-head))
+         (new-tail (let ((l (add-state nil nil)))
+                     (setf (state-attrib (access-state p-tail)) '∈)
+                     (setf (state-out1 (access-state p-tail)) p-head)
+                     (setf (state-out2 (access-state p-tail)) l))))
+    (setf (state-out2 (access-state last-tail)) new-tail)
+    new-tail))
 
 (defun make-nfa (parse-tree &optional tail)
   "MAKE-NFA
