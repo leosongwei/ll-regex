@@ -3,7 +3,11 @@
 
 (defun make-dfa (N))
 
-(defun get-input-alphabet (N))
+(defun get-input-alphabet (N)
+  (let ((result nil)
+        (trans-table N))
+    (dotimes (index nfa-buff-len)
+      (let ((match (state-match (access-state index))))
 
 (defun epsilon-closure (state-index N)
   "EPSILON-CLOSURE
