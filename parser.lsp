@@ -67,22 +67,26 @@
 (defun split-union (paren-lst &optional result current flag)
   "SPLIT-UNION
    split union into pices, smartly :D
-   RETURN: (union pice1 pice2 ...)"
+   RETURN: (union pice1 pice2 ...)
+
+   for `a||b` it has: (jmp (union (a) (b)))
+   for single item forms after split, it returns the singular form."
   (labels ((commit ()
              (if current
-               (progn
-                 (setf result (append result (list (reverse current))))
-                 (if (null current)
-                   (setf flag '+))
-                 (setf current nil)))))
+               (setf result (append result (list (reverse current))))
+               (setf flag 'jmp))
+             (setf current nil)))
     (if (null paren-lst)
       (progn
         (commit)
-        (if (null result)
-          nil
-          (if flag
-            (cons 'union result)
-            (list '+ (cons 'union result)))))
+        (if result
+          (if (cdr result) ; length > 1
+            (progn
+              (if (eq 'jmp flag)
+                (list 'jmp (cons 'union result))
+                (cons 'union result)))
+            (car result))
+          nil))
       (progn
         (if (eq #\| (car paren-lst))
           (commit)
