@@ -70,7 +70,7 @@
    RETURN: (union pice1 pice2 ...)
 
    for `a||b` it has: (jmp (union (a) (b)))
-   for single item forms after split, it returns the singular form."
+   for single item forms after split, it returns the singular form with jmp."
   (labels ((commit ()
              (if current
                (setf result (append result (list (reverse current))))
@@ -85,7 +85,7 @@
               (if (eq 'jmp flag)
                 (list 'jmp (cons 'union result))
                 (cons 'union result)))
-            (car result))
+            (cons 'jmp result))
           nil))
       (progn
         (if (eq #\| (car paren-lst))

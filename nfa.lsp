@@ -52,11 +52,13 @@
     (defparameter trans-table (make-array 100))
     (defparameter index-trans-table 0)
     (defparameter parse-stack nil))
-  (let* ((parse-tree (parse-regex regex-string))
-         (tail (make-nfa parse-tree)))
-    (setf (state-attrib (access-state tail)) 'fi)
-    (print-trans-table)
-    ))
+  (let* ((parse-tree (parse-regex regex-string)))
+    (if parse-tree
+      (let ((tail (make-nfa parse-tree)))
+        (setf (state-attrib (access-state tail)) 'fi)
+        (print-trans-table)
+        )
+      nil)))
 
 (defun make-union (parse-tree tail)
   (let* ((todo (cdr parse-tree))
