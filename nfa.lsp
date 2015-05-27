@@ -122,6 +122,25 @@
     (setf (state-out2 (access-state last-tail)) new-tail)
     new-tail))
 
+(defun make-jmp (parse-tree tail)
+  "MAKE-JMP
+   constructs (a||b)
+   RETURN: tail index"
+  (let* ((last-tail (if tail
+                      (progn
+                        (setf (state-attrib (access-state tail)) '∈)
+                        tail)
+                      (add-state nil '∈)))
+         (p-head (let ((h (add-state nil nil)))
+                   (setf (state-out1 (access-state last-tail)) h)
+                   h))
+         (p-tail (make-nfa (cdr parse-tree) p-head))
+         (new-tail (let ((l (add-state nil nil)))
+                     (setf (state-attrib (access-state p-tail)) '∈)
+                     (setf (state-out1 (access-state p-tail)) l))))
+    (setf (state-out2 (access-state last-tail)) new-tail)
+    new-tail))
+
 (defun make-nfa (parse-tree &optional tail)
   "MAKE-NFA
    using `caller-handler` mode to construct NFA from
@@ -141,6 +160,7 @@
                       (cond ((eq 'union head) (make-union current tail))
                             ((eq '+ head) (make-plus current tail))
                             ((eq '* head) (make-star current tail))
+                            ((eq 'jmp head) (make-jmp current tail))
                             (t (make-nfa current tail)))))
                (make-nfa (cdr parse-tree) tail)))
             (t (if (= 0 index-trans-table)
