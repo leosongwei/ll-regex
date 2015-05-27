@@ -1,11 +1,12 @@
 (progn
-  (defparameter trans-table (make-array 100))
+  (defparameter nfa-buff-len 100)
+  (defparameter trans-table (make-array nfa-buff-len :initial-element nil))
   (defparameter index-trans-table 0)
   (defparameter parse-stack nil))
 
 (defun print-trans-table ()
   (dotimes (index (array-dimension trans-table 0))
-    (if (eq 0 (aref trans-table index))
+    (if (null (aref trans-table index))
       (return))
     (format t "~A: ~A~%" index (aref trans-table index))))
 
@@ -49,16 +50,14 @@
    serving as an wrapper, dealing with dirty jobs.
    RETURN: NFA in a TRANS-TABLE"
   (progn
-    (defparameter trans-table (make-array 100))
+    (defparameter trans-table (make-array nfa-buff-len :initial-element nil))
     (defparameter index-trans-table 0)
     (defparameter parse-stack nil))
   (let* ((parse-tree (parse-regex regex-string)))
     (if parse-tree
       (let ((tail (make-nfa parse-tree)))
-        (setf (state-attrib (access-state tail)) 'fi)
-        (print-trans-table)
-        )
-      nil)))
+        (setf (state-attrib (access-state tail)) 'fi))))
+  trans-table)
 
 (defun make-union (parse-tree tail)
   (let* ((todo (cdr parse-tree))
