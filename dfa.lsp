@@ -29,7 +29,24 @@
       (traverse-map state-index)
       result)))
 
-(defun epsilon-closure-set (states))
+(defun epsilon-closure-set (states N)
+  "EPSILON-CLOSURE-SET
+   see the dragon book, 3.7
+   RETURN: set of status"
+  (let ((result nil))
+    (dolist (state states)
+      (setf result (union result
+                          (epsilon-closure state N))))
+    result))
 
-(defun move (state-set c))
+(defun move (states match N)
+  "MOVE
+   see the dragon book, 3.7
+   RETURN: set of status"
+   (let ((result nil)
+         (trans-table N))
+     (dolist (index states)
+       (if (eq match (state-match (access-state index)))
+         (push (state-out1 (access-state index)) result)))
+     result))
 
