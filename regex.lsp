@@ -14,4 +14,5 @@
 ;load {{{
 (load "parser.lsp")
 (load "nfa.lsp")
+(load "dfa.lsp")
 ;}}}

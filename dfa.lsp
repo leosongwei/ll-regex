@@ -28,7 +28,7 @@
       (return))
     (format t "~A: ~A~%" index (aref dfa-table index))))
 
-(defun make-dfa (N)
+(defun make-dfa (N sym-name)
   "MAKE-DFA
    make dfa, see the dragon book, 3.7
    RETURN: trans-table dfa"
@@ -72,6 +72,11 @@
                          (apply-algorithm new-s))))))))
       (let ((s0 (add-frag (epsilon-closure 0 N))))
         (apply-algorithm 0))
+      (dotimes (i nfa-buff-len)
+        (if (null (aref dfa-table i))
+          (return)
+          (if (member fi-state (dfa-state-states (aref dfa-table i)))
+            (setf (dfa-state-sym-name (aref dfa-table i)) sym-name))))
       dfa-table)))
 
 (defun get-fi (N)
