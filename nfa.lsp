@@ -4,11 +4,11 @@
   (defparameter index-trans-table 0)
   (defparameter parse-stack nil))
 
-(defun print-trans-table ()
-  (dotimes (index (array-dimension trans-table 0))
-    (if (null (aref trans-table index))
+(defun print-trans-table (NFA)
+  (dotimes (index (array-dimension NFA 0))
+    (if (null (aref NFA index))
       (return))
-    (format t "~A: ~A~%" index (aref trans-table index))))
+    (format t "~A: ~A~%" index (aref NFA index))))
 
 (defstruct (state (:print-function print-state))
   (attrib nil)
