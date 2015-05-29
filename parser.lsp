@@ -42,11 +42,14 @@
                  (eq #\? current-char))
              (let ((sym (cond ((eq #\* current-char) '*)
                               ((eq #\+ current-char) '+)
-                              ((eq #\? current-char) 'jmp))))
-               (setf parse-stack
-                     (append (butlast parse-stack)
-                             (list
-                               (list sym (last parse-stack)))))))
+                              ((eq #\? current-char) 'jmp)))
+                   (last-one (car (last parse-stack))))
+               (if (eq 'bp last-one)
+                 (error "PARSE-REGEX: invalid exp. Check repeat operators.~%")
+                 (setf parse-stack
+                       (append (butlast parse-stack)
+                               (list
+                                 (list sym last-one)))))))
             (t (setf parse-stack (append parse-stack
                                          (list current-char))))))
     (if (not (= 0 paren-level))
