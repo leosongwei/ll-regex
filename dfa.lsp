@@ -28,6 +28,12 @@
       (return))
     (format t "~A: ~A~%" index (aref dfa-table index))))
 
+(defun construct-dfa (regex-string &optional (sym-name 'match))
+  "CONSTRUCT-DFA
+   wrapper for MAKE-DFA
+   RETURN: dfa trans table"
+  (make-dfa (construct-nfa regex-string) sym-name))
+
 (defun make-dfa (N sym-name)
   "MAKE-DFA
    make dfa, see the dragon book, 3.7
