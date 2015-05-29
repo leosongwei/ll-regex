@@ -1,9 +1,21 @@
 (defun match-state (input-char state-index dfa)
+  "MATCH-STATE
+   judge input and tell MATCH which state should it goto or not match.
+   RETURN: NIL or Index of dest"
   (let ((go? nil))
     (dolist (out (dfa-state-outs (aref dfa state-index)))
-      (cond (t (if (eq input-char (car out))
-                 (setf go? (cdr out))))))
+      (if (cond ((eq 'digit (car out)) (is-digit? input-char))
+                (t (eq input-char (car out))))
+        (progn
+          (setf go? (cdr out))
+          (return))))
     go?))
+
+(defun is-digit? (d)
+  (let ((n (char-int d)))
+    (if (and (>= n 48)
+             (<= n 57))
+      t nil)))
 
 (defun match (input-string dfa)
   (let ((state-index 0)

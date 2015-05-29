@@ -31,9 +31,12 @@
                    (setf parse-stack rest-stack)))))
             ((eq #\\ current-char)
              (setf parse-stack
-                   (append parse-stack
-                           (list
-                             (get-char regex-string (incf index))))))
+                   (append
+                     parse-stack
+                     (list
+                       (let ((next-char (get-char regex-string (incf index))))
+                         (cond ((eq #\d next-char) 'digit)
+                               (t next-char)))))))
             ((or (eq #\* current-char)
                  (eq #\+ current-char)
                  (eq #\? current-char))
