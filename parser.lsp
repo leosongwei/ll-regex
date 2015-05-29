@@ -36,6 +36,8 @@
                      (list
                        (let ((next-char (get-char regex-string (incf index))))
                          (cond ((eq #\d next-char) 'digit)
+                               ((eq #\e next-char) 'lowcase)
+                               ((eq #\E next-char) 'uppcase)
                                (t next-char)))))))
             ((or (eq #\* current-char)
                  (eq #\+ current-char)

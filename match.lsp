@@ -5,11 +5,25 @@
   (let ((go? nil))
     (dolist (out (dfa-state-outs (aref dfa state-index)))
       (if (cond ((eq 'digit (car out)) (is-digit? input-char))
+                ((eq 'lowcase (car out)) (is-lowercase input-char))
+                ((eq 'uppcase (car out)) (is-uppercase input-char))
                 (t (eq input-char (car out))))
         (progn
           (setf go? (cdr out))
           (return))))
     go?))
+
+(defun is-uppercase (d)
+  (let ((n (char-int d)))
+    (if (and (>= n 65)
+             (<= n 90))
+      t nil)))
+
+(defun is-lowercase (d)
+  (let ((n (char-int d)))
+    (if (and (>= n 97)
+             (<= n 122))
+      t nil)))
 
 (defun is-digit? (d)
   (let ((n (char-int d)))
