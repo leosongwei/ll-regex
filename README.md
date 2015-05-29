@@ -3,6 +3,8 @@ README.md
 
 leo's light regex egine, for Common Lisp.
 
+**ll-regex is released under a BSD style license, please see LICENSE.md.**
+
 Feature:
 
 repeat operators:
@@ -17,7 +19,7 @@ meta character:
 * \e lower case
 * \E upper case
 
-support parentheses and "|" operator for union.
+Support parentheses and "|" operator for union.
 
 Example:
 
@@ -30,4 +32,4 @@ Example:
 
 for more info, see the docstring of MATCH (in ./match.lsp).
 
-ll-regex is released under a BSD style license, please see LICENSE.md.
+for update, see https://github.com/leosongwei/ll-regex
