@@ -44,6 +44,8 @@
                                (list sym (car (last parse-stack))))))))
             (t (setf parse-stack (append parse-stack
                                          (list current-char))))))
+    (if (not (= 0 paren-level))
+      (error "PARSE-REGEX: parentheses not closed!~%"))
     parse-stack))
 
 (defun split-by-sym (stack result sym)
