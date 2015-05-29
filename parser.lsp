@@ -35,13 +35,15 @@
                            (list
                              (get-char regex-string (incf index))))))
             ((or (eq #\* current-char)
-                 (eq #\+ current-char))
+                 (eq #\+ current-char)
+                 (eq #\? current-char))
              (let ((sym (cond ((eq #\* current-char) '*)
-                              ((eq #\+ current-char) '+))))
+                              ((eq #\+ current-char) '+)
+                              ((eq #\? current-char) 'jmp))))
                (setf parse-stack
                      (append (butlast parse-stack)
                              (list
-                               (list sym (car (last parse-stack))))))))
+                               (list sym (last parse-stack)))))))
             (t (setf parse-stack (append parse-stack
                                          (list current-char))))))
     (if (not (= 0 paren-level))
