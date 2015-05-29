@@ -29,6 +29,11 @@
                    (setf parse-stack
                          (append rest-stack (list result-stack)))
                    (setf parse-stack rest-stack)))))
+            ((eq #\\ current-char)
+             (setf parse-stack
+                   (append parse-stack
+                           (list
+                             (get-char regex-string (incf index))))))
             ((or (eq #\* current-char)
                  (eq #\+ current-char))
              (let ((sym (cond ((eq #\* current-char) '*)
