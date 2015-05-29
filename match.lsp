@@ -18,6 +18,9 @@
       t nil)))
 
 (defun match (input-string dfa)
+  "MATCH
+   jump between states of dfa according to MATCH-STATE
+   RETURN: sym-name or nil"
   (let ((state-index 0)
         (match? t))
     (dotimes (index (string-length input-string))
