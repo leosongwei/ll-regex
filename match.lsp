@@ -14,19 +14,19 @@
     go?))
 
 (defun is-uppercase (d)
-  (let ((n (char-int d)))
+  (let ((n (char-code d)))
     (if (and (>= n 65)
              (<= n 90))
       t nil)))
 
 (defun is-lowercase (d)
-  (let ((n (char-int d)))
+  (let ((n (char-code d)))
     (if (and (>= n 97)
              (<= n 122))
       t nil)))
 
 (defun is-digit? (d)
-  (let ((n (char-int d)))
+  (let ((n (char-code d)))
     (if (and (>= n 48)
              (<= n 57))
       t nil)))
