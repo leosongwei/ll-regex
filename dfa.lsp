@@ -32,7 +32,8 @@
   "CONSTRUCT-DFA
    wrapper for MAKE-DFA
    RETURN: dfa trans table"
-    (make-dfa (construct-nfa regex-string) sym-name))
+  (kill-dead-state
+    (make-dfa (construct-nfa regex-string) sym-name)))
 
 (defun make-dfa (N sym-name)
   "MAKE-DFA
