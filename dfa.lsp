@@ -32,7 +32,8 @@
   "CONSTRUCT-DFA
    wrapper for MAKE-DFA
    RETURN: dfa trans table"
-  (make-dfa (construct-nfa regex-string) sym-name))
+  (kill-dead-state
+    (make-dfa (construct-nfa regex-string) sym-name)))
 
 (defun make-dfa (N sym-name)
   "MAKE-DFA
@@ -157,3 +158,41 @@
          (push (state-out1 (access-state index)) result)))
      result))
 
+(defun find-dead-state (dfa-table)
+  "FIND-DEAD-STATE
+   get the index of dead state.
+   RETURN:index"
+  (let ((trans-table dfa-table)
+        (dead-state-index nil))
+    (dotimes (i (array-dimension dfa-table 0))
+      (let ((state (access-state i)))
+        (if (dfa-state-p state)
+          (let ((black-hole? t))
+            (dolist (out (dfa-state-outs state))
+              (if (= i (cdr out))
+                t
+                (setf black-hole? nil)))
+            (if (and black-hole?
+                     (null (dfa-state-states state)))
+              (return i))))))))
+
+(defun kill-dead-state (dfa-table)
+  "KILL-DEAD-STATE
+   remove outs to the dead state.
+   RETURN: dfa-table given, dead outs removed"
+  (let ((dead-state-index (find-dead-state dfa-table)))
+    (if dead-state-index
+      (let ((trans-table dfa-table))
+        (dotimes (i (array-dimension trans-table 0))
+          (let ((state (access-state i))
+                (outs nil))
+            ; filter out to dead state
+            (if (dfa-state-p state)
+              (progn
+                (dolist (out (dfa-state-outs state))
+                  (if (= (cdr out) dead-state-index)
+                    nil
+                    (push out outs)))
+                (setf (dfa-state-outs (access-state i)) outs)))))
+        trans-table)
+      dfa-table)))
